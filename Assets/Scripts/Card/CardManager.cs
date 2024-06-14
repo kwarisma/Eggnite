@@ -13,12 +13,11 @@ public class CardManager : MonoBehaviour
     [SerializeField]
     private List<CardProfile> cardProfiles;  // List of card profiles to be used
 
-    [SerializeField]
     private Card cardPrefab;  // Prefab for creating card instances
 
-    public int Width = 5;  // Width of the card grid
-    public int Length = 6; // Length of the card grid
-    public int Stage;
+    private int Width = 5;  // Width of the card grid
+    private int Length = 6; // Length of the card grid
+    private int Stage;
 
 
     private void Awake()
@@ -30,14 +29,20 @@ public class CardManager : MonoBehaviour
     }
 
     // Initialize the card manager
-    public void Init()
+    public void Init(LevelStatus levelStatus)
     {
+        Stage = levelStatus.Index;
+        startPivot = levelStatus.Pivot;
+        Width = levelStatus.Width;
+        Length = levelStatus.Length;
+        cardPrefab = levelStatus.CardPrefab;
+
         if(PlayerPrefs.HasKey("Stage_" + Stage))
         {
-            InitCard(LoadCard(),false);
+            StartCoroutine(InitCard(LoadCard(),false));
         }
         else
-            InitCard(GetRandomCard(),true);
+           StartCoroutine(InitCard(GetRandomCard(),true));
     }
 
     public void ResetStage()
@@ -45,13 +50,13 @@ public class CardManager : MonoBehaviour
         PlayerPrefs.DeleteKey("Stage_" + Stage);
     }
 
-    public bool IsVide()
+    public bool IsVide(int cardCount)
     {
-        return cardParent.childCount <= 1;
+        return cardCount >= (Width * Length);
     }
 
     // Initialize the cards on the grid
-    private void InitCard(List<CardProfile> currentProfiles ,bool useSave)
+    private IEnumerator InitCard(List<CardProfile> currentProfiles ,bool useSave)
     {
         int index = 0;
         float x = startPivot.position.x;
@@ -67,12 +72,15 @@ public class CardManager : MonoBehaviour
                     CreateCard(new Vector3(x, y, 1), currentProfiles[index]);
                     if(useSave)
                          SaveCard(currentProfiles[index].Name);
+                    yield return new WaitForSeconds(0.1f);
                 }
                 x += 2;  // Move to the next position on the x-axis
                 index++;
             }
             y -= 2;  // Move to the next position on the y-axis
         }
+
+        GameManager.Instance.InGame = true;
     }
 
     // Create a card at the specified position with the given profile

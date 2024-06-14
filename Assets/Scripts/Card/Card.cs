@@ -9,10 +9,13 @@ public class Card : MonoBehaviour
     public SpriteRenderer FrontSprite;
 
     bool canClick = true;
+
     public void Init()
     {
         FrontSprite.sprite = Profile.Sprite;
         FrontSprite.DOFade(1, 0);
+        transform.DOPunchScale(new Vector3(1.5f, 1.5f, 1.5f), 1f);
+        transform.DORotate(new Vector3(0, 0, 0), 2);
     }
 
     public void ResetCard()
@@ -38,6 +41,7 @@ public class Card : MonoBehaviour
         if (!canClick)
             return;
         canClick = false;
+        SoundManager.Instance.PlaySoundFX(0);
         FrontSprite.DOFade(1, 0);
         transform.DORotate(new Vector3(0, 180, 0), 0.5f).OnComplete(() => Check());
     }
