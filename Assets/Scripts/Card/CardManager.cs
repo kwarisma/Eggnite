@@ -20,6 +20,7 @@ public class CardManager : MonoBehaviour
     private int Stage;
     private float PaddingVertical,PaddingHorizontal;
 
+    #region MonoBehaviour
 
     private void Awake()
     {
@@ -29,6 +30,9 @@ public class CardManager : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Public Methode
     // Initialize the card manager
     public void Init(LevelStatus levelStatus)
     {
@@ -58,6 +62,18 @@ public class CardManager : MonoBehaviour
         return cardCount >= (Width * Length);
     }
 
+    public void RemoveCard(string cardName)
+    {
+        string loadCardString = PlayerPrefs.GetString("Stage_" + Stage, "");
+        int index = loadCardString.IndexOf(cardName);
+        loadCardString = loadCardString.Remove(index, cardName.Length);
+        loadCardString = loadCardString.Insert(index, "null");
+        PlayerPrefs.SetString("Stage_" + Stage, loadCardString);
+    }
+
+    #endregion
+
+    #region Private Methode
     // Initialize the cards on the grid
     private IEnumerator InitCard(List<CardProfile> currentProfiles ,bool useSave)
     {
@@ -95,23 +111,14 @@ public class CardManager : MonoBehaviour
         newCard.transform.SetParent(cardParent);
     }
 
-    public void RemoveCard(string cardName)
-    {
-        string loadCardString = PlayerPrefs.GetString("Stage_" + Stage, "");
-        int index = loadCardString.IndexOf(cardName);
-        loadCardString=loadCardString.Remove(index, cardName.Length);
-        loadCardString=loadCardString.Insert(index, "null");
-        PlayerPrefs.SetString("Stage_" + Stage, loadCardString);
-    }
-
-    public void SaveCard(string cardName)
+    private void SaveCard(string cardName)
     {
         string loadCardString = PlayerPrefs.GetString("Stage_" + Stage, "");
         loadCardString += cardName + "+";
         PlayerPrefs.SetString("Stage_" + Stage,loadCardString);
     }
 
-    public List<CardProfile> LoadCard()
+    private List<CardProfile> LoadCard()
     {
         List<string> cardStrings = PlayerPrefs.GetString("Stage_" + Stage, "").Split("+").ToList();
         List<CardProfile> res = new List<CardProfile>();
@@ -149,4 +156,6 @@ public class CardManager : MonoBehaviour
         }
         return res;
     }
+
+    #endregion
 }
