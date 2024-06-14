@@ -18,6 +18,7 @@ public class CardManager : MonoBehaviour
     private int Width = 5;  // Width of the card grid
     private int Length = 6; // Length of the card grid
     private int Stage;
+    private float PaddingVertical,PaddingHorizontal;
 
 
     private void Awake()
@@ -36,6 +37,8 @@ public class CardManager : MonoBehaviour
         Width = levelStatus.Width;
         Length = levelStatus.Length;
         cardPrefab = levelStatus.CardPrefab;
+        PaddingVertical = levelStatus.PaddingVertical;
+        PaddingHorizontal = levelStatus.PaddingHorizontal;
 
         if(PlayerPrefs.HasKey("Stage_" + Stage))
         {
@@ -74,10 +77,10 @@ public class CardManager : MonoBehaviour
                          SaveCard(currentProfiles[index].Name);
                     yield return new WaitForSeconds(0.1f);
                 }
-                x += 2;  // Move to the next position on the x-axis
+                x += PaddingHorizontal;  // Move to the next position on the x-axis
                 index++;
             }
-            y -= 2;  // Move to the next position on the y-axis
+            y -= PaddingVertical;  // Move to the next position on the y-axis
         }
 
         GameManager.Instance.InGame = true;

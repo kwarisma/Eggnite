@@ -220,5 +220,6 @@ public class LevelStatus
     public int Index;
     public Transform Pivot;
     public int Width, Length;
+    public float PaddingVertical, PaddingHorizontal;
     public Card CardPrefab;
 }
