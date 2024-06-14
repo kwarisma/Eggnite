@@ -5,7 +5,13 @@ using UnityEngine;
 
 public class CardManager : MonoBehaviour
 {
+    #region Public Variable
+
     public static CardManager Instance;
+
+    #endregion
+
+    #region Private Variable
 
     [SerializeField]
     private Transform startPivot, cardParent;  // Transform for the starting position and parent container of the cards
@@ -19,6 +25,8 @@ public class CardManager : MonoBehaviour
     private int Length = 6; // Length of the card grid
     private int Stage;
     private float PaddingVertical,PaddingHorizontal;
+
+    #endregion
 
     #region MonoBehaviour
 

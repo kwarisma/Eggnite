@@ -5,12 +5,18 @@ using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
+    #region Public Variable
+
     public static SoundManager Instance;
 
     public AudioSource MusicSource, FxSource;
     public AudioClip[] FxClips;
 
     public Text SoundTxt, MusicTxt;
+
+    #endregion
+
+    #region MonoBehaviour
 
     private void Awake()
     {
@@ -35,11 +41,14 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Public Methode
+
     public void PlaySoundFX(int index)
     {
         FxSource.PlayOneShot(FxClips[index]);
     }
-
 
     public void SoundOnOff()
     {
@@ -72,4 +81,6 @@ public class SoundManager : MonoBehaviour
             MusicTxt.text = "MUSIC ON";
         }
     }
+
+    #endregion
 }

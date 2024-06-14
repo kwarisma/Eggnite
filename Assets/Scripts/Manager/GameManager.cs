@@ -5,28 +5,40 @@ using UnityEngine.UI;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
 
+// GameManager is responsible for managing game states, level selections, and player interactions.
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    #region Public Variables
 
-    public List<LevelStatus> Levels;
-    public bool InGame;
+    public static GameManager Instance; // Singleton instance of GameManager
 
-    public Text ScoreTxt, ComboTxt, WinScoreTxt, MaxComboTxt,TimerTxt;
+    public List<LevelStatus> Levels; // List of level statuses
+    public bool InGame; // Flag to check if the game is in progress
+
+    // UI Elements
+    public Text ScoreTxt, ComboTxt, WinScoreTxt, MaxComboTxt, TimerTxt;
     public Image TimerBar;
 
+    // Game state variables
     public int Level;
     public int Score, Combo, MaxCombo;
-    public float ComboValue,TimerValue=60;
+    public float ComboValue, TimerValue = 60;
     public Transform ComboBar;
-    public GameObject MainScreen,WinScreen, LoseScreen, GameplayScreen;
+    public GameObject MainScreen, WinScreen, LoseScreen, GameplayScreen;
     public Animation TimerMotion;
 
-    [SerializeField]
-    private Transform hideCardPosition;
-    private int valideCardCount;
-    private Card SelectCard;
+    #endregion
 
+    #region Private Variables
+
+    [SerializeField]
+    private Transform hideCardPosition; // Position to hide the card
+    private int valideCardCount; // Valid card count
+    private Card SelectCard; // Currently selected card
+
+    #endregion
+
+    #region MonoBehaviour
 
     private void Awake()
     {
@@ -36,25 +48,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void Home()
-    {
-        SceneManager.LoadScene(0);
-    }
-
-    public void SelectLevel(int level)
-    {
-        Level = level;
-        InitValue();
-        valideCardCount = PlayerPrefs.GetInt("valideCardCount_" + Level, 0);
-        CardManager.Instance.Init(Levels[level - 1]);
-        MainScreen.SetActive(false);
-        GameplayScreen.SetActive(true);
-    }
-
     private void Update()
     {
         if (!InGame)
             return;
+
+        // Update timer
         if (TimerValue >= 0)
         {
             TimerValue -= Time.deltaTime;
@@ -70,9 +69,10 @@ public class GameManager : MonoBehaviour
             Lose();
         }
 
+        // Update combo value
         if (ComboValue >= 0)
         {
-            ComboValue -= Time.deltaTime*0.05f;
+            ComboValue -= Time.deltaTime * 0.05f;
             PlayerPrefs.SetFloat("ComboValue" + Level, ComboValue);
             ComboBar.DOScaleX(ComboValue, 0f);
         }
@@ -82,34 +82,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Lose()
+    #endregion
+
+    #region Public Methods
+
+    public void Home()
     {
-        CardManager.Instance.ResetStage();
-        GameplayScreen.SetActive(false);
-        WinScoreTxt.DOText(Score.ToString(), 0.5f);
-        MaxComboTxt.DOText("X " + MaxCombo, 0.5f);
-        LoseScreen.SetActive(true);
-        InGame = false;
-        ResetValue();
+        SceneManager.LoadScene(0);
     }
 
+    // Select and initialize a level
+    public void SelectLevel(int level)
+    {
+        Level = level;
+        InitValue();
+        valideCardCount = PlayerPrefs.GetInt("valideCardCount_" + Level, 0);
+        CardManager.Instance.Init(Levels[level - 1]);
+        MainScreen.SetActive(false);
+        GameplayScreen.SetActive(true);
+    }
+
+    // Check if the player has won
     public void CheckWin()
     {
         if (CardManager.Instance.IsVide(valideCardCount))
             Win();
     }
 
-    private void Win()
-    {
-        CardManager.Instance.ResetStage();
-        GameplayScreen.SetActive(false);
-        WinScoreTxt.DOText(Score.ToString(), 0.5f);
-        MaxComboTxt.DOText("X "+MaxCombo, 0.5f);
-        WinScreen.SetActive(true);
-        InGame = false;
-        ResetValue();
-    }
-
+    // Handle card selection and matching
     public void CheckCard(Card card)
     {
         if (SelectCard)
@@ -129,17 +129,45 @@ public class GameManager : MonoBehaviour
                 SelectCard.ResetCard();
                 card.ResetCard();
                 SelectCard = null;
-            }  
+            }
         }
         else
             SelectCard = card;
- 
     }
 
+    #endregion
+
+    #region Private Methods
+
+    // Handle losing the game
+    private void Lose()
+    {
+        CardManager.Instance.ResetStage();
+        GameplayScreen.SetActive(false);
+        WinScoreTxt.DOText(Score.ToString(), 0.5f);
+        MaxComboTxt.DOText("X " + MaxCombo, 0.5f);
+        LoseScreen.SetActive(true);
+        InGame = false;
+        ResetValue();
+    }
+
+    // Handle winning the game
+    private void Win()
+    {
+        CardManager.Instance.ResetStage();
+        GameplayScreen.SetActive(false);
+        WinScoreTxt.DOText(Score.ToString(), 0.5f);
+        MaxComboTxt.DOText("X " + MaxCombo, 0.5f);
+        WinScreen.SetActive(true);
+        InGame = false;
+        ResetValue();
+    }
+
+    // Add score and handle combo strikes
     private void AddScore()
     {
         SoundManager.Instance.PlaySoundFX(1);
-        Score += (1*Combo);
+        Score += (1 * Combo);
         TimerValue += 5;
         TimerMotion.Play();
         ScoreTxt.DOText(Score.ToString(), 0.5f);
@@ -148,10 +176,12 @@ public class GameManager : MonoBehaviour
         AddComboStrike();
     }
 
+    // Add combo strike
     private void AddComboStrike()
     {
         ComboValue += 0.4f;
-        ComboBar.DOScaleX(ComboValue, 1);
+        ComboBar.DOScaleX(ComboValue, 0.5f);
+        ComboBar.parent.DOPunchScale(new Vector3(0.5f, 0.5f, 0.5f), 1f,5);
         if (ComboValue >= 1)
         {
             ComboValue = 0.3f;
@@ -169,6 +199,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Remove combo strike
     private void RemoveComboStrike()
     {
         if (Combo > 1)
@@ -177,10 +208,10 @@ public class GameManager : MonoBehaviour
             Combo--;
             ComboTxt.DOText(Combo.ToString(), 0.5f);
             ComboTxt.transform.DOPunchScale(new Vector3(1.5f, 1.5f, 1.5f), 1);
-           
         }
     }
 
+    // Initialize values at the start of a level
     private void InitValue()
     {
         Combo = PlayerPrefs.GetInt("Combo_" + Level, 1);
@@ -195,10 +226,9 @@ public class GameManager : MonoBehaviour
         ScoreTxt.DOText(Score.ToString(), 1);
 
         ComboValue = PlayerPrefs.GetFloat("ComboValue_" + Level, 0);
-
     }
 
-
+    // Reset values at the end of a level
     private void ResetValue()
     {
         PlayerPrefs.DeleteKey("valideCardCount_" + Level);
@@ -207,19 +237,18 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.DeleteKey("Score_" + Level);
         PlayerPrefs.DeleteKey("ComboValue_" + Level);
         PlayerPrefs.DeleteKey("TimerValue_" + Level);
-
     }
 
-
-
+    #endregion
 }
 
+// LevelStatus is used to store information about each level
 [System.Serializable]
 public class LevelStatus
 {
-    public int Index;
-    public Transform Pivot;
-    public int Width, Length;
-    public float PaddingVertical, PaddingHorizontal;
-    public Card CardPrefab;
+    public int Index; // Level index
+    public Transform Pivot; // Level pivot point
+    public int Width, Length; // Dimensions of the level
+    public float PaddingVertical, PaddingHorizontal; // Padding values
+    public Card CardPrefab; // Card prefab for the level
 }
